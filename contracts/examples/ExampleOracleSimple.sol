@@ -1,11 +1,8 @@
 pragma solidity =0.6.6;
 
-import '@uniswap/v2-core/contracts/interfaces/IPancakeFactory.sol';
-import '@uniswap/v2-core/contracts/interfaces/IPancakePair.sol';
 import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
-
-import '../libraries/PancakeOracleLibrary.sol';
-import '../libraries/PancakeLibrary.sol';
+import '../libraries/RaizerOracleLibrary.sol';
+import '../libraries/RaizerLibrary.sol';
 
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
@@ -14,7 +11,7 @@ contract ExampleOracleSimple {
 
     uint public constant PERIOD = 24 hours;
 
-    IPancakePair immutable pair;
+    IRaizerPair immutable pair;
     address public immutable token0;
     address public immutable token1;
 
@@ -25,7 +22,7 @@ contract ExampleOracleSimple {
     FixedPoint.uq112x112 public price1Average;
 
     constructor(address factory, address tokenA, address tokenB) public {
-        IPancakePair _pair = IPancakePair(PancakeLibrary.pairFor(factory, tokenA, tokenB));
+        IRaizerPair _pair = IRaizerPair(RaizerLibrary.pairFor(factory, tokenA, tokenB));
         pair = _pair;
         token0 = _pair.token0();
         token1 = _pair.token1();
@@ -39,7 +36,7 @@ contract ExampleOracleSimple {
 
     function update() external {
         (uint price0Cumulative, uint price1Cumulative, uint32 blockTimestamp) =
-            PancakeOracleLibrary.currentCumulativePrices(address(pair));
+            RaizerOracleLibrary.currentCumulativePrices(address(pair));
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
 
         // ensure that at least one full period has passed since the last update
